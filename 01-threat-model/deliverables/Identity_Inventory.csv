@@ -1,9 +1,0 @@
-Identity type,Authentication mechanism,Privilege level
-Human user (customer),Auth0 Universal Login; OAuth 2.0 Auth Code + PKCE; OIDC,Own tickets/PII/chat only
-Human user (CSR),OIDC + MFA + Enterprise SSO,Assigned cases; no LLM keys
-Human security admin,OIDC + MFA + Auth0 RBAC,Tenant security config; no standing LLM keys
-AI agent orchestrator,OBO user JWT + M2M client credentials (short-lived),Delegated user scopes + constrained tools
-OAuth M2M client,Client Credentials grant / Auth0 JWT,tickets:* and kb:search; not admin
-LLM API key,Provider key from vault; rotated,Inference only
-RAG pipeline service identity,Workload / M2M JWT,Retrieve read; ingest uses separate write identity
-MCP server identity,OAuth RS + mTLS + optional Ed25519,Allow-listed tools only
