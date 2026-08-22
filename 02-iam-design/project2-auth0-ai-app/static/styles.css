@@ -1,0 +1,58 @@
+:root {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  color: #102a43;
+  background: #f0f4f8;
+}
+body {
+  margin: 0;
+  padding: 2rem;
+  max-width: 860px;
+  margin-inline: auto;
+}
+.eyebrow {
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #486581;
+  margin-bottom: 0;
+}
+h1 {
+  margin-top: 0.25rem;
+}
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin-top: 1rem;
+  box-shadow: 0 8px 24px rgba(16, 42, 67, 0.08);
+}
+.row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+button {
+  background: #0b69a3;
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+pre {
+  background: #102a43;
+  color: #e0fcff;
+  padding: 1rem;
+  border-radius: 8px;
+  overflow: auto;
+  min-height: 8rem;
+}
+code {
+  background: #d9e2ec;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
