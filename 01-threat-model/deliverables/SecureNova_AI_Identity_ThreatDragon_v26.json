@@ -1,0 +1,603 @@
+{
+  "version": "2.6.2",
+  "summary": {
+    "title": "SecureNova AI Identity System - Project 1 Threat Model",
+    "owner": "AI Identity Security Analyst",
+    "description": "STRIDE threat model of SecureNova Inc. LLM customer-service platform. Identities: human users, AI agent, OAuth M2M client, LLM API key, RAG pipeline service identity, MCP server identity. Trust boundaries: User Layer | Agent Layer | Internal API Layer.",
+    "id": 0
+  },
+  "detail": {
+    "contributors": [{ "name": "AI Identity Security Analyst" }],
+    "diagramTop": 1,
+    "reviewer": "SecureNova Security Team",
+    "threatTop": 6,
+    "diagrams": [
+      {
+        "id": 0,
+        "title": "AI Identity Data-Flow Diagram",
+        "diagramType": "STRIDE",
+        "placeholder": "New STRIDE diagram",
+        "thumbnail": "./public/content/images/thumbnail.stride.jpg",
+        "version": "2.6.2",
+        "description": "Identity components and trust boundaries for SecureNova AI customer service.",
+        "cells": [
+          {
+            "id": "tb-user",
+            "shape": "trust-boundary-box",
+            "zIndex": 0,
+            "position": { "x": 20, "y": 20 },
+            "size": { "width": 280, "height": 640 },
+            "data": {
+              "type": "tm.BoundaryBox",
+              "name": "User Layer",
+              "description": "Browsers, Universal Login, public chat. Trust boundary before the agent.",
+              "isTrustBoundary": true,
+              "hasOpenThreats": false
+            }
+          },
+          {
+            "id": "tb-agent",
+            "shape": "trust-boundary-box",
+            "zIndex": 0,
+            "position": { "x": 320, "y": 20 },
+            "size": { "width": 300, "height": 640 },
+            "data": {
+              "type": "tm.BoundaryBox",
+              "name": "Agent Layer",
+              "description": "AI orchestrator, secret checkout, prompt assembly, LLM calls.",
+              "isTrustBoundary": true,
+              "hasOpenThreats": false
+            }
+          },
+          {
+            "id": "tb-internal",
+            "shape": "trust-boundary-box",
+            "zIndex": 0,
+            "position": { "x": 640, "y": 20 },
+            "size": { "width": 430, "height": 640 },
+            "data": {
+              "type": "tm.BoundaryBox",
+              "name": "Internal API Layer",
+              "description": "REST APIs, RAG, MCP tools, audit store.",
+              "isTrustBoundary": true,
+              "hasOpenThreats": false
+            }
+          },
+          {
+            "id": "actor-user",
+            "shape": "actor",
+            "zIndex": 2,
+            "position": { "x": 70, "y": 380 },
+            "size": { "width": 180, "height": 80 },
+            "label": "Human User (OIDC+PKCE)",
+            "data": {
+              "type": "tm.Actor",
+              "name": "Human User (OIDC+PKCE)",
+              "description": "Customer or CSR via Auth0 Universal Login, Authorization Code + PKCE / OIDC.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": false,
+              "providesAuthentication": true,
+              "threats": []
+            }
+          },
+          {
+            "id": "actor-auth0",
+            "shape": "actor",
+            "zIndex": 2,
+            "position": { "x": 70, "y": 80 },
+            "size": { "width": 180, "height": 80 },
+            "label": "Auth0 Tenant (IdP/SSO)",
+            "data": {
+              "type": "tm.Actor",
+              "name": "Auth0 Tenant (IdP/SSO)",
+              "description": "Universal Login, Social and Enterprise connections, Attack Protection, MFA, M2M.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": false,
+              "providesAuthentication": true,
+              "threats": []
+            }
+          },
+          {
+            "id": "actor-llm",
+            "shape": "actor",
+            "zIndex": 2,
+            "position": { "x": 1100, "y": 80 },
+            "size": { "width": 170, "height": 80 },
+            "label": "LLM Provider (API key)",
+            "data": {
+              "type": "tm.Actor",
+              "name": "LLM Provider (API key)",
+              "description": "External model service account with rotated LLM API keys.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": false,
+              "providesAuthentication": false,
+              "threats": []
+            }
+          },
+          {
+            "id": "proc-agent",
+            "shape": "process",
+            "zIndex": 2,
+            "position": { "x": 410, "y": 280 },
+            "size": { "width": 120, "height": 120 },
+            "label": "AI Agent Orchestrator",
+            "attrs": {
+              "text": { "text": "AI Agent Orchestrator" },
+              "body": { "stroke": "#c0392b", "strokeWidth": 2, "strokeDasharray": null }
+            },
+            "data": {
+              "type": "tm.Process",
+              "name": "AI Agent Orchestrator",
+              "description": "Non-human identity: OBO user JWT + constrained M2M client. Calls REST, RAG, MCP, LLM.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": true,
+              "handlesCardPayment": false,
+              "handlesGoodsOrServices": false,
+              "isWebApplication": true,
+              "privilegeLevel": "Delegated user scopes plus constrained tools",
+              "threats": [
+                {
+                  "title": "Spoofed AI agent presents stolen OBO token",
+                  "type": "Spoofing",
+                  "modelType": "STRIDE",
+                  "status": "Open",
+                  "severity": "High",
+                  "description": "Attacker replays or forges an Auth0 on-behalf-of token so a fake agent calls APIs and MCP tools as a real agent.",
+                  "mitigation": "DPoP/cnf binding, short TTL, mTLS, Ed25519 request signing, no implicit agent trust.",
+                  "threatId": "t-s",
+                  "number": 1,
+                  "score": "20"
+                },
+                {
+                  "title": "RAG context or tool arguments tampered",
+                  "type": "Tampering",
+                  "modelType": "STRIDE",
+                  "status": "Open",
+                  "severity": "High",
+                  "description": "Poisoned chunks or MCP payloads make the agent execute attacker-chosen tools.",
+                  "mitigation": "Signed chunks, ingest allow-list, tool schema allow-list.",
+                  "threatId": "t-t",
+                  "number": 2,
+                  "score": "16"
+                },
+                {
+                  "title": "Missing non-human identity audit trail",
+                  "type": "Repudiation",
+                  "modelType": "STRIDE",
+                  "status": "Open",
+                  "severity": "Medium",
+                  "description": "Agent, MCP, and RAG actions are not bound to a durable actor ID.",
+                  "mitigation": "Signed audit events with agent_id, user_sub, client_id, tool name, chunk IDs.",
+                  "threatId": "t-r",
+                  "number": 3,
+                  "score": "12"
+                },
+                {
+                  "title": "Prompt injection discloses LLM API key",
+                  "type": "Information disclosure",
+                  "modelType": "STRIDE",
+                  "status": "Open",
+                  "severity": "High",
+                  "description": "Direct or indirect prompt injection (OWASP LLM01/LLM07) echoes secrets from env or traces.",
+                  "mitigation": "Never put secrets in prompts; vault; short-lived keys; output guardrails.",
+                  "threatId": "t-i",
+                  "number": 4,
+                  "score": "25"
+                },
+                {
+                  "title": "Unbounded tool loops exhaust quotas",
+                  "type": "Denial of service",
+                  "modelType": "STRIDE",
+                  "status": "Open",
+                  "severity": "Medium",
+                  "description": "Malicious prompt or poisoned chunk causes recursive MCP calls.",
+                  "mitigation": "Per-identity rate limits, max tool depth, circuit breakers.",
+                  "threatId": "t-d",
+                  "number": 5,
+                  "score": "12"
+                },
+                {
+                  "title": "Agent elevates to admin API scope",
+                  "type": "Elevation of privilege",
+                  "modelType": "STRIDE",
+                  "status": "Open",
+                  "severity": "High",
+                  "description": "Confused deputy: M2M client has overlapping admin scopes after spoofing or RAG instruction (LLM09).",
+                  "mitigation": "Separate M2M clients, Auth0 RBAC, step-up for privileged tools.",
+                  "threatId": "t-e",
+                  "number": 6,
+                  "score": "20"
+                }
+              ]
+            }
+          },
+          {
+            "id": "proc-api",
+            "shape": "process",
+            "zIndex": 2,
+            "position": { "x": 700, "y": 70 },
+            "size": { "width": 110, "height": 110 },
+            "label": "Internal REST API",
+            "attrs": {
+              "text": { "text": "Internal REST API" },
+              "body": { "stroke": "#333333", "strokeWidth": 1.5, "strokeDasharray": null }
+            },
+            "data": {
+              "type": "tm.Process",
+              "name": "Internal REST API",
+              "description": "Resource server validating Auth0 JWTs with audience-bound scopes.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": false,
+              "handlesCardPayment": false,
+              "handlesGoodsOrServices": false,
+              "isWebApplication": true,
+              "privilegeLevel": "tickets:read tickets:write",
+              "threats": []
+            }
+          },
+          {
+            "id": "proc-rag",
+            "shape": "process",
+            "zIndex": 2,
+            "position": { "x": 700, "y": 270 },
+            "size": { "width": 110, "height": 110 },
+            "label": "RAG Pipeline Identity",
+            "attrs": {
+              "text": { "text": "RAG Pipeline Identity" },
+              "body": { "stroke": "#333333", "strokeWidth": 1.5, "strokeDasharray": null }
+            },
+            "data": {
+              "type": "tm.Process",
+              "name": "RAG Pipeline Identity",
+              "description": "Workload identity that embeds and retrieves knowledge chunks.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": false,
+              "handlesCardPayment": false,
+              "handlesGoodsOrServices": false,
+              "isWebApplication": false,
+              "privilegeLevel": "vector read; ingest is a separate identity",
+              "threats": []
+            }
+          },
+          {
+            "id": "proc-mcp",
+            "shape": "process",
+            "zIndex": 2,
+            "position": { "x": 700, "y": 490 },
+            "size": { "width": 110, "height": 110 },
+            "label": "MCP Server Identity",
+            "attrs": {
+              "text": { "text": "MCP Server Identity" },
+              "body": { "stroke": "#333333", "strokeWidth": 1.5, "strokeDasharray": null }
+            },
+            "data": {
+              "type": "tm.Process",
+              "name": "MCP Server Identity",
+              "description": "OAuth resource server plus mTLS; optional Ed25519 signed invocations.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": false,
+              "handlesCardPayment": false,
+              "handlesGoodsOrServices": false,
+              "isWebApplication": false,
+              "privilegeLevel": "Allow-listed tools only",
+              "threats": []
+            }
+          },
+          {
+            "id": "store-secrets",
+            "shape": "store",
+            "zIndex": 2,
+            "position": { "x": 385, "y": 500 },
+            "size": { "width": 170, "height": 75 },
+            "label": "Secrets / LLM API keys",
+            "data": {
+              "type": "tm.Store",
+              "name": "Secrets / LLM API keys",
+              "description": "Short-lived LLM API keys and M2M client secrets.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": false,
+              "isALog": false,
+              "isEncrypted": true,
+              "isSigned": true,
+              "storesCredentials": true,
+              "storesInventory": false,
+              "threats": []
+            }
+          },
+          {
+            "id": "store-vector",
+            "shape": "store",
+            "zIndex": 2,
+            "position": { "x": 880, "y": 280 },
+            "size": { "width": 170, "height": 75 },
+            "label": "Vector DB / RAG chunks",
+            "data": {
+              "type": "tm.Store",
+              "name": "Vector DB / RAG chunks",
+              "description": "Indexed knowledge chunks. Integrity-sensitive.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": false,
+              "isALog": false,
+              "isEncrypted": true,
+              "isSigned": true,
+              "storesCredentials": false,
+              "storesInventory": false,
+              "threats": []
+            }
+          },
+          {
+            "id": "store-audit",
+            "shape": "store",
+            "zIndex": 2,
+            "position": { "x": 880, "y": 510 },
+            "size": { "width": 170, "height": 75 },
+            "label": "Identity audit log",
+            "data": {
+              "type": "tm.Store",
+              "name": "Identity audit log",
+              "description": "Append-only identity events for humans, agents, OAuth clients, MCP.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": false,
+              "isALog": true,
+              "isEncrypted": true,
+              "isSigned": true,
+              "storesCredentials": false,
+              "storesInventory": false,
+              "threats": []
+            }
+          },
+          {
+            "id": "flow-user-auth0",
+            "shape": "flow",
+            "zIndex": 3,
+            "connector": "smooth",
+            "source": { "cell": "actor-user" },
+            "target": { "cell": "actor-auth0" },
+            "labels": [{ "attrs": { "label": { "text": "OIDC / PKCE login" } }, "position": 0.5 }],
+            "data": {
+              "type": "tm.Flow",
+              "name": "OIDC / PKCE login",
+              "description": "Authorization Code + PKCE.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": false,
+              "isBidirectional": false,
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "protocol": "HTTPS/OIDC",
+              "threats": []
+            }
+          },
+          {
+            "id": "flow-auth0-agent",
+            "shape": "flow",
+            "zIndex": 3,
+            "connector": "smooth",
+            "source": { "cell": "actor-auth0" },
+            "target": { "cell": "proc-agent" },
+            "labels": [{ "attrs": { "label": { "text": "OBO + M2M JWT" } }, "position": 0.5 }],
+            "data": {
+              "type": "tm.Flow",
+              "name": "OBO + M2M JWT",
+              "description": "User-delegated token and M2M client-credentials token.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": false,
+              "isBidirectional": false,
+              "isEncrypted": true,
+              "isPublicNetwork": false,
+              "protocol": "HTTPS/OAuth2",
+              "threats": []
+            }
+          },
+          {
+            "id": "flow-user-agent",
+            "shape": "flow",
+            "zIndex": 3,
+            "connector": "smooth",
+            "source": { "cell": "actor-user" },
+            "target": { "cell": "proc-agent" },
+            "labels": [{ "attrs": { "label": { "text": "Chat / task prompt" } }, "position": 0.5 }],
+            "data": {
+              "type": "tm.Flow",
+              "name": "Chat / task prompt",
+              "description": "Crosses User Layer to Agent Layer.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": false,
+              "isBidirectional": false,
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "protocol": "WSS/HTTPS",
+              "threats": []
+            }
+          },
+          {
+            "id": "flow-agent-api",
+            "shape": "flow",
+            "zIndex": 3,
+            "connector": "smooth",
+            "source": { "cell": "proc-agent" },
+            "target": { "cell": "proc-api" },
+            "labels": [{ "attrs": { "label": { "text": "JWT API call" } }, "position": 0.5 }],
+            "data": {
+              "type": "tm.Flow",
+              "name": "JWT API call",
+              "description": "Crosses Agent Layer to Internal API Layer.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": false,
+              "isBidirectional": false,
+              "isEncrypted": true,
+              "isPublicNetwork": false,
+              "protocol": "HTTPS/JWT",
+              "threats": []
+            }
+          },
+          {
+            "id": "flow-agent-rag",
+            "shape": "flow",
+            "zIndex": 3,
+            "connector": "smooth",
+            "source": { "cell": "proc-agent" },
+            "target": { "cell": "proc-rag" },
+            "labels": [{ "attrs": { "label": { "text": "Retrieve chunks" } }, "position": 0.5 }],
+            "data": {
+              "type": "tm.Flow",
+              "name": "Retrieve chunks",
+              "description": "Query embedding plus top-k chunks into agent context.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": false,
+              "isBidirectional": false,
+              "isEncrypted": true,
+              "isPublicNetwork": false,
+              "protocol": "HTTPS",
+              "threats": []
+            }
+          },
+          {
+            "id": "flow-rag-vec",
+            "shape": "flow",
+            "zIndex": 3,
+            "connector": "smooth",
+            "source": { "cell": "proc-rag" },
+            "target": { "cell": "store-vector" },
+            "labels": [{ "attrs": { "label": { "text": "ANN search / ingest" } }, "position": 0.5 }],
+            "data": {
+              "type": "tm.Flow",
+              "name": "ANN search / ingest",
+              "description": "Pipeline identity reads and writes embeddings.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": false,
+              "isBidirectional": true,
+              "isEncrypted": true,
+              "isPublicNetwork": false,
+              "protocol": "TLS",
+              "threats": []
+            }
+          },
+          {
+            "id": "flow-agent-mcp",
+            "shape": "flow",
+            "zIndex": 3,
+            "connector": "smooth",
+            "source": { "cell": "proc-agent" },
+            "target": { "cell": "proc-mcp" },
+            "labels": [{ "attrs": { "label": { "text": "MCP tool invoke" } }, "position": 0.5 }],
+            "data": {
+              "type": "tm.Flow",
+              "name": "MCP tool invoke",
+              "description": "Signed tool call with agent identity.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": false,
+              "isBidirectional": false,
+              "isEncrypted": true,
+              "isPublicNetwork": false,
+              "protocol": "MCP/HTTPS",
+              "threats": []
+            }
+          },
+          {
+            "id": "flow-agent-llm",
+            "shape": "flow",
+            "zIndex": 3,
+            "connector": "smooth",
+            "source": { "cell": "proc-agent" },
+            "target": { "cell": "actor-llm" },
+            "labels": [{ "attrs": { "label": { "text": "Inference (API key)" } }, "position": 0.5 }],
+            "data": {
+              "type": "tm.Flow",
+              "name": "Inference (API key)",
+              "description": "Must not include long-lived secrets in the prompt.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": false,
+              "isBidirectional": false,
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "protocol": "HTTPS",
+              "threats": []
+            }
+          },
+          {
+            "id": "flow-agent-secrets",
+            "shape": "flow",
+            "zIndex": 3,
+            "connector": "smooth",
+            "source": { "cell": "proc-agent" },
+            "target": { "cell": "store-secrets" },
+            "labels": [{ "attrs": { "label": { "text": "Fetch short-lived key" } }, "position": 0.5 }],
+            "data": {
+              "type": "tm.Flow",
+              "name": "Fetch short-lived key",
+              "description": "Runtime secret retrieval and rotation.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": false,
+              "isBidirectional": false,
+              "isEncrypted": true,
+              "isPublicNetwork": false,
+              "protocol": "HTTPS",
+              "threats": []
+            }
+          },
+          {
+            "id": "flow-mcp-audit",
+            "shape": "flow",
+            "zIndex": 3,
+            "connector": "smooth",
+            "source": { "cell": "proc-mcp" },
+            "target": { "cell": "store-audit" },
+            "labels": [{ "attrs": { "label": { "text": "Identity events" } }, "position": 0.5 }],
+            "data": {
+              "type": "tm.Flow",
+              "name": "Identity events",
+              "description": "Tool invocation audit with agent and user IDs.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": false,
+              "isBidirectional": false,
+              "isEncrypted": true,
+              "isPublicNetwork": false,
+              "protocol": "TLS",
+              "threats": []
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

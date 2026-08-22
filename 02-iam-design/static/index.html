@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SecureNova AI Chat — Auth0 PKCE</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
+    <script src="/config.js"></script>
+  </head>
+  <body>
+    <header>
+      <p class="eyebrow">SecureNova Inc.</p>
+      <h1>AI Chat Service</h1>
+      <p>OAuth 2.0 Authorization Code + PKCE · scopes <code>read:ai-data</code> / <code>write:admin</code></p>
+      <p><a href="/lab">Open AI Agent Lab (Projects 3 and 4)</a></p>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>Session</h2>
+        <p id="status">Checking Auth0 session…</p>
+        <div class="row">
+          <button id="login">Log in (PKCE)</button>
+          <button id="logout" hidden>Log out</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>API calls</h2>
+        <p>User-level tokens have <code>read:ai-data</code> only. <code>/admin</code> must return <strong>403</strong>.</p>
+        <div class="row">
+          <button id="call-chat" disabled>GET /chat</button>
+          <button id="call-admin" disabled>GET /admin (expect 403)</button>
+          <button id="show-token" disabled>Show tokens for jwt.io</button>
+        </div>
+        <pre id="output"></pre>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

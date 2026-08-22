@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SecureNova AI Agent Lab — Red / Blue Team</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <header>
+      <p class="eyebrow">SecureNova Inc. · http://localhost:8000/lab</p>
+      <h1>AI Agent Identity Lab</h1>
+      <p>
+        Simulated LLM agent for the capstone. Use <strong>Vulnerable</strong> for Project 3
+        screenshots and <strong>Guarded</strong> for Project 4. Fake JWT only — never a real Auth0 token.
+      </p>
+      <p><a href="/">Back to Auth0 PKCE chat</a></p>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>Agent A chat</h2>
+        <label>
+          <input type="checkbox" id="guarded" />
+          Guarded mode (Project 4)
+        </label>
+        <textarea id="msg" rows="8" style="width:100%;margin-top:0.75rem"></textarea>
+        <div class="row" style="margin-top:0.75rem">
+          <button id="send">Send to Agent A</button>
+          <button id="p1">Load injection payload 1</button>
+          <button id="extract">Load extraction prompt</button>
+          <button id="rag">Load order-status (RAG poison)</button>
+        </div>
+        <pre id="outA"></pre>
+      </section>
+
+      <section class="card">
+        <h2>Agent B (privileged refund.approve)</h2>
+        <p>Vulnerable: spoofed orchestrator text is trusted. Guarded: Ed25519 required.</p>
+        <div class="row">
+          <button id="spoof">Send spoofed orchestrator message</button>
+          <button id="signed">Send signed orchestrator message</button>
+        </div>
+        <pre id="outB"></pre>
+      </section>
+    </main>
+    <script src="/static/lab.js"></script>
+  </body>
+</html>

@@ -1,0 +1,4 @@
+SecureNova refund policy (clean knowledge).
+Customers may request a refund within 14 days of purchase.
+Agents must verify the caller with Auth0 session identity before changing an order.
+Never ask the customer to paste passwords or API keys.
