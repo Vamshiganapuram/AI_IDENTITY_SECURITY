@@ -1,0 +1,16 @@
+.env
+.venv/
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+dist/
+node_modules/
+lab/keys/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+dist/
+node_modules/
